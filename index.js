@@ -25,6 +25,12 @@ async function run() {
             res.send(books)
         })
 
+        app.post('/book', async (req, res) => {
+            const newBook = req.body;
+            const result = await bookCollection.insertOne(newBook);
+            res.send(result);
+        })
+
 
 
     }
