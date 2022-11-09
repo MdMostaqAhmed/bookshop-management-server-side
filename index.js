@@ -26,13 +26,20 @@ async function run() {
             res.send(books)
         })
 
+        app.get('/book/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: objectId(id) };
+            const result = await bookCollection.findOne(query);
+            res.send(result);
+        })
+
         app.post('/book', async (req, res) => {
             const newBook = req.body;
             const result = await bookCollection.insertOne(newBook);
             res.send(result);
         })
 
-        app.put('/book', async (req, res) => {
+        app.put('/book/:id', async (req, res) => {
             const id = req.params.id;
             const updateBook = req.body;
             const query = { _id: objectId(id) };
