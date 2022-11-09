@@ -32,6 +32,26 @@ async function run() {
             res.send(result);
         })
 
+        app.put('/book', async (req, res) => {
+            const id = req.params.id;
+            const updateBook = req.body;
+            const query = { _id: objectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    name: updateBook.name,
+                    img: updateBook.img,
+                    price: updateBook.price,
+                    supplier: updateBook.supplier,
+                    available: updateBook.available,
+                    sold: updateBook.sold
+                },
+            };
+            const result = await bookCollection.updateOne(query, updateDoc, options);
+            res.send(result)
+
+        })
+
         app.delete('/book/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: objectId(id) };
