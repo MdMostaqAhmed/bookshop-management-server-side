@@ -19,10 +19,17 @@ async function run() {
         await client.connect();
         const bookCollection = client.db('bookShop').collection('books');
 
+        app.get('/limitemBooks', async (req, res) => {
+            const query = {};
+            const cursor = bookCollection.find(query);
+            const books = await (await cursor.toArray()).slice(0, 6);
+            res.send(books)
+        })
+
         app.get('/books', async (req, res) => {
             const query = {};
             const cursor = bookCollection.find(query);
-            const books = await cursor.toArray();
+            const books = await (await cursor.toArray());
             res.send(books)
         })
 
@@ -30,6 +37,14 @@ async function run() {
             const id = req.params.id;
             const query = { _id: objectId(id) };
             const result = await bookCollection.findOne(query);
+            res.send(result);
+        })
+
+        app.get('/myItem', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const cursor = bookCollection.find(query);
+            const result = await cursor.toArray();
             res.send(result);
         })
 
@@ -50,6 +65,21 @@ async function run() {
                     img: updateBook.img,
                     price: updateBook.price,
                     supplier: updateBook.supplier,
+                    available: updateBook.available,
+                    sold: updateBook.sold
+                },
+            };
+            const result = await bookCollection.updateOne(query, updateDoc, options);
+            res.send(result)
+
+        })
+        app.put('/books/:id', async (req, res) => {
+            const id = req.params.id;
+            const updateBook = req.body;
+            const query = { _id: objectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
                     available: updateBook.available,
                     sold: updateBook.sold
                 },
