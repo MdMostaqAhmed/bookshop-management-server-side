@@ -19,13 +19,15 @@ async function run() {
         await client.connect();
         const bookCollection = client.db('bookShop').collection('books');
 
-        app.get('/limitemBooks', async (req, res) => {
+        // Load six products for home page
+        app.get('/limitedBooks', async (req, res) => {
             const query = {};
             const cursor = bookCollection.find(query);
             const books = await (await cursor.toArray()).slice(0, 6);
             res.send(books)
         })
 
+        //Load all products
         app.get('/books', async (req, res) => {
             const query = {};
             const cursor = bookCollection.find(query);
@@ -33,6 +35,7 @@ async function run() {
             res.send(books)
         })
 
+        // Load specific product detail by id
         app.get('/book/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: objectId(id) };
@@ -40,6 +43,7 @@ async function run() {
             res.send(result);
         })
 
+        // Load specific product detail by email
         app.get('/myItem', async (req, res) => {
             const email = req.query.email;
             const query = { email: email };
@@ -48,12 +52,14 @@ async function run() {
             res.send(result);
         })
 
+        // Add a single item
         app.post('/book', async (req, res) => {
             const newBook = req.body;
             const result = await bookCollection.insertOne(newBook);
             res.send(result);
         })
 
+        // Update specific item
         app.put('/book/:id', async (req, res) => {
             const id = req.params.id;
             const updateBook = req.body;
@@ -73,6 +79,8 @@ async function run() {
             res.send(result)
 
         })
+
+        // Update delivered and instock 
         app.put('/books/:id', async (req, res) => {
             const id = req.params.id;
             const updateBook = req.body;
@@ -89,6 +97,7 @@ async function run() {
 
         })
 
+        // Delete a product
         app.delete('/book/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: objectId(id) };
