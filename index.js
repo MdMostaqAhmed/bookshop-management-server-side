@@ -10,8 +10,11 @@ const cors = require("cors");
 app.use(cors());
 app.use(express.json());
 
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.xmos1oa.mongodb.net/?retryWrites=true&w=majority`;
+//const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.xmos1oa.mongodb.net/?retryWrites=true&w=majority`;
 // const uri = "mongodb+srv://books:6ItrKtUGil18zL2j@cluster0.xmos1oa.mongodb.net/?retryWrites=true&w=majority";
+//const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.3qafz9v.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 async function run() {
@@ -52,6 +55,17 @@ async function run() {
             res.send(result);
         })
 
+        // Delete item by registered user
+        app.delete('/myItem/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: objectId(id) };
+
+            const result = await bookCollection.deleteOne(query);
+            res.send(result);
+        })
+
+
+
         // Add a single item
         app.post('/book', async (req, res) => {
             const newBook = req.body;
@@ -69,6 +83,7 @@ async function run() {
                 $set: {
                     name: updateBook.name,
                     img: updateBook.img,
+                    description: updateBook.description,
                     price: updateBook.price,
                     supplier: updateBook.supplier,
                     available: updateBook.available,
