@@ -26,17 +26,37 @@ async function run() {
         app.get('/limitedBooks', async (req, res) => {
             const query = {};
             const cursor = bookCollection.find(query);
-            const books = await (await cursor.toArray()).slice(0, 6);
+            const books = await cursor.limit(6).toArray();
             res.send(books)
-        })
+        });
 
         //Load all products
         app.get('/books', async (req, res) => {
+            // const query = {};
+            // const cursor = bookCollection.find(query);
+            // const books = await cursor.toArray();
+            // res.send(books)
+            console.log("query:", req.query);
+            const page = parseInt(req.query.page);
+            const size = parseInt(req.query.size);
             const query = {};
             const cursor = bookCollection.find(query);
-            const books = await (await cursor.toArray());
-            res.send(books)
-        })
+            let products;
+            if (page || size) {
+                products = await cursor.skip(page * size).limit(size).toArray()
+            } else {
+                products = await cursor.toArray()
+            }
+            res.send(products)
+        });
+
+        // Load Data for count
+        app.get('/bookCount', async (req, res) => {
+            const count = await bookCollection.estimatedDocumentCount();
+            res.send({ count })
+        });
+
+
 
         // Load specific product detail by id
         app.get('/book/:id', async (req, res) => {
@@ -44,7 +64,7 @@ async function run() {
             const query = { _id: objectId(id) };
             const result = await bookCollection.findOne(query);
             res.send(result);
-        })
+        });
 
         // Load specific product detail by email
         app.get('/myItem', async (req, res) => {
@@ -53,7 +73,7 @@ async function run() {
             const cursor = bookCollection.find(query);
             const result = await cursor.toArray();
             res.send(result);
-        })
+        });
 
         // Delete item by registered user
         app.delete('/myItem/:id', async (req, res) => {
@@ -62,7 +82,7 @@ async function run() {
 
             const result = await bookCollection.deleteOne(query);
             res.send(result);
-        })
+        });
 
 
 
@@ -71,7 +91,7 @@ async function run() {
             const newBook = req.body;
             const result = await bookCollection.insertOne(newBook);
             res.send(result);
-        })
+        });
 
         // Update specific item
         app.put('/book/:id', async (req, res) => {
@@ -92,8 +112,7 @@ async function run() {
             };
             const result = await bookCollection.updateOne(query, updateDoc, options);
             res.send(result)
-
-        })
+        });
 
         // Update delivered and instock 
         app.put('/books/:id', async (req, res) => {
@@ -109,8 +128,7 @@ async function run() {
             };
             const result = await bookCollection.updateOne(query, updateDoc, options);
             res.send(result)
-
-        })
+        });
 
         // Delete a product
         app.delete('/book/:id', async (req, res) => {
@@ -118,13 +136,13 @@ async function run() {
             const query = { _id: objectId(id) };
             const result = await bookCollection.deleteOne(query);
             res.send(result);
-        })
+        });
 
     }
     finally { }
 
 }
-run().catch(console.dir)
+run().catch(console.dir);
 
 
 app.get("/", (req, res) => {
