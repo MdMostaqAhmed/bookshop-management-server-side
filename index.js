@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const port = process.env.PORT || 5000;
 require("dotenv").config();
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const objectId = require("mongodb").ObjectId;
 
@@ -21,6 +22,13 @@ async function run() {
     try {
         await client.connect();
         const bookCollection = client.db('bookShop').collection('books');
+
+        //Auth
+        app.post('/login', async (req, res) => {
+            const user = req.body;
+            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
+            res.send({ accessToken })
+        })
 
         // Load six products for home page
         app.get('/limitedBooks', async (req, res) => {
@@ -68,6 +76,8 @@ async function run() {
 
         // Load specific product detail by email
         app.get('/myItem', async (req, res) => {
+            const authHeader = req.headers.authorization;
+            console.log(authHeader);
             const email = req.query.email;
             const query = { email: email };
             const cursor = bookCollection.find(query);
