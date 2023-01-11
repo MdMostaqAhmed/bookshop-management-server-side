@@ -21,7 +21,7 @@ function verifyJWT(req, res, next) {
         if (err) {
             return res.status(403).send({ message: 'Forbidden Access' })
         }
-        console.log('decoded:', decoded)
+        // console.log('decoded:', decoded)
         req.decoded = decoded;
         next();
     })
@@ -39,8 +39,10 @@ async function run() {
         //Auth
         app.post('/login', async (req, res) => {
             const user = req.body;
-            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
-            res.send({ accessToken })
+            console.log(user)
+            const accessToken = jwt.sign({ email: user.email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });
+            console.log(accessToken)
+            res.send({ accessToken: accessToken })
         })
 
         // Load six products for home page
@@ -88,17 +90,27 @@ async function run() {
         });
 
         // Load specific product detail by email
-        app.get('/myItem', verifyJWT, async (req, res) => {
-            const decodedEmail = req.decoded.email;
+        app.get('/myItem', async (req, res) => {
+
+
             const email = req.query.email;
-            if (email === decodedEmail) {
-                const query = { email: email };
-                const cursor = bookCollection.find(query);
-                const result = await cursor.toArray();
-                res.send(result);
-            } else {
-                res.status(403).send({ message: 'Forbidden Access' })
-            }
+            const query = { email: email };
+            const cursor = bookCollection.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+
+            console.log(email);
+
+            // if (email == decodedEmail) {
+            //     const query = { email: email };
+            //     const cursor = bookCollection.find(query);
+            //     const result = await cursor.toArray();
+            //     res.send(result);
+            // } else {
+            //     res.status(403).send({ message: 'Forbidden Access' })
+            // }
+
+            // res.send({ message: 'test' })
         });
 
         // Delete item by registered user
